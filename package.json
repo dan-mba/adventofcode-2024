@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "one": "node dist/one.js"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +16,7 @@
     "typescript": "^5.7.2"
   },
   "devDependencies": {
-    "@total-typescript/tsconfig": "^1.0.4"
+    "@total-typescript/tsconfig": "^1.0.4",
+    "@types/node": "^22.10.1"
   }
 }
