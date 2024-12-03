@@ -1,6 +1,8 @@
 {
-  "extends": "@total-typescript/tsconfig/tsc/no-dom/app",
+  "extends": "@total-typescript/tsconfig/tsc/no-dom/app", 
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
+    "target": "ES2023",
+    "lib": ["ES2023"]
   }
 }
