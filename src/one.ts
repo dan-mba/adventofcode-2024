@@ -6,6 +6,7 @@ let fh;
 let first:number[] = [];
 let second:number[] = [];
 let sum = 0;
+let sim = 0;
 
 try {
   fh = await open(join(cwd(),"input/one.txt"), "r");
@@ -26,7 +27,13 @@ try {
     sum += Math.abs((first[i] || 0) - (second[i] || 0));
   }
 
-  console.log(sum);
+  first.forEach(num => {
+    const count = second.filter(n => n === num).length;
+    sim += (count * num);
+  })
+
+  console.log("sum: ", sum);
+  console.log("sim: ", sim);
 } finally {
   await fh?.close()
 }
