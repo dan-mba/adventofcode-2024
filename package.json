@@ -8,7 +8,8 @@
     "build": "tsc",
     "one": "node dist/one.js",
     "two": "node dist/two.js",
-    "three": "node dist/three.js"
+    "three": "node dist/three.js",
+    "five": "node dist/five.js"
   },
   "keywords": [],
   "author": "",
