@@ -11,7 +11,7 @@ function operators (a:number, b:number):number[] {
 }
 
 try {
-  fh = await open(join(cwd(),"input/seven.practice.txt"), "r");
+  fh = await open(join(cwd(),"input/seven.txt"), "r");
   const data = await fh.readFile({encoding: "utf-8"});
   const lines = data.split("\n");
   const equations = lines.map(l => l.split(": "));
