@@ -9,6 +9,10 @@ let sum = 0;
 function operators (a:number, b:number):number[] {
   return [a+b, a*b];
 }
+function operators2 (a:number, b:number):number[] {
+  const c = Number(a.toString().concat(b.toString()));
+  return [a+b, a*b, c];
+}
 
 try {
   fh = await open(join(cwd(),"input/seven.txt"), "r");
@@ -20,11 +24,11 @@ try {
     if (eq.length !== 2) return;
     const ans = Number(eq[0]);
     const operands = (eq[1] ?? "").split(" ").map(x => Number(x));
-    let tries = operators(operands[0] ?? 0, operands[1] ?? 0);
+    let tries = operators2(operands[0] ?? 0, operands[1] ?? 0);
     const nums = operands.slice(2);
     while (nums.length > 0) {
       const n = nums.shift();
-      tries = tries.flatMap(x => operators(x, n ?? 0));
+      tries = tries.flatMap(x => operators2(x, n ?? 0));
     }
     if (tries.includes(ans)) {
       sum += ans;
