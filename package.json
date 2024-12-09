@@ -10,7 +10,8 @@
     "two": "node dist/two.js",
     "three": "node dist/three.js",
     "five": "node dist/five.js",
-    "seven": "node dist/seven.js"
+    "seven": "node dist/seven.js",
+    "nine": "node dist/nine.js"
   },
   "keywords": [],
   "author": "",
