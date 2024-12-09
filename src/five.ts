@@ -30,16 +30,15 @@ function fixRules(pages:string[], rules:string[][]):number {
     const r = pageRules(page ?? '', rules);
     if (r.length === 0) continue;
 
-    const indexes = r.map(x => list.indexOf(x)).filter(x => x<i);
+    const indexes = r.map(x => list.indexOf(x)).filter(x => x<i && x>= 0);
     if (indexes.length === 0) continue;
 
     indexes.sort((a, b) => a-b);
-    const swap = indexes[indexes.length-1];
-    if (swap === -1) continue; 
+    const swap = indexes[0];
 
     const temp = list.toSpliced(i, 1);
     list = [...temp.slice(0,swap), page ?? '', ...temp.slice(swap) ];
-    i=1;
+    i--;
   }
   return Number(list[Math.floor(list.length/2)]);
 }
