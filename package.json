@@ -11,7 +11,8 @@
     "three": "node dist/three.js",
     "five": "node dist/five.js",
     "seven": "node dist/seven.js",
-    "nine": "node dist/nine.js"
+    "nine": "node dist/nine.js",
+    "eleven": "node dist/eleven.js"
   },
   "keywords": [],
   "author": "",
