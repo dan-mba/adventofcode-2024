@@ -1,6 +1,7 @@
 import { open } from "node:fs/promises";
 import { join } from "node:path";
 import { cwd } from "node:process";
+import { lusolve, type MathArray } from "mathjs";
 
 let fh;
 
@@ -37,13 +38,10 @@ function solveGame(game:Game):number {
   for (let a = aMax; a>=0; a--) {
     const b1 = (px - (a * ax))/bx;
     const b2 = (py - (a * ay))/by;
-    if (b1 === b2 &&Math.floor(b1) === b1 && b1 >= 0 && b1 <= 100) {
+    if (b1 === b2 && Math.floor(b1) === b1 && b1 >= 0 && b1 <= 100) {
       solutions.push([a,b1])
     }
   }
-
-  console.log(solutions)
-
 
   return solutions.reduce((min, x) => {
     const total = ((x[0] ?? 0) * 3) + (x[1] ?? 0);
@@ -58,32 +56,30 @@ function solveGame2(game:Game):number {
   const ay = game?.a[1] ?? 0;
   const bx = game?.b[0] ?? 0;
   const by = game?.b[1] ?? 0;
-  const aMax = Math.floor(Math.min(px/ax, py/ay));
-  
 
-  let solutions:number[][] = [];
-  for (let a = aMax; a>=0; a--) {
-    const b1 = (px - (a * ax))/bx;
-    const b2 = (py - (a * ay))/by;
-    if (b1 === b2 &&Math.floor(b1) === b1 && b1 >= 0) {
-      solutions.push([a,b1])
-    }
-  }
+  const coefficients = [
+    [ax, bx],
+    [ay, by]
+  ];
+  const constants = [px, py];
+  const answers = lusolve(coefficients, constants).flat();
+  const a = Math.floor(Number(answers[0]) * 100)/100;
+  const b = Math.floor(Number(answers[1]) * 100)/100;
 
-  return solutions.reduce((min, x) => {
-    const total = ((x[0] ?? 0) * 3) + (x[1] ?? 0);
-    return Math.min(min, total)
-  }, 150000)
+  // console.log(a,b)
+
+  if (Math.floor(a) === a && Math.floor(b) === b) return (a * 3) + b;
+  return 0;
 }
 
 try {
-  fh = await open(join(cwd(),"input/thirteen.practice.txt"), "r");
+  fh = await open(join(cwd(),"input/thirteen.txt"), "r");
   const data = await fh.readFile({encoding: "utf-8"});
   const games = data.split("\n\n");
   const gameObjects = games.map(g => parseGame(g)).filter(g => g.a[0] !== -1);
 
   const solved = gameObjects.map(g => solveGame(g)).filter(s => s !== 150000);
-  const solved2 = gameObjects.map(g => solveGame2(g)).filter(s => s !== 150000);
+  const solved2 = gameObjects.map(g => solveGame2(g));
 
   const sum = solved.reduce((s,c) => s+c, 0)
   const sum2 = solved2.reduce((s,c) => s+c, 0)
