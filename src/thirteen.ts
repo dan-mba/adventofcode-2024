@@ -68,7 +68,7 @@ function solveGame2(game:Game):number {
 
   // console.log(a,b)
 
-  if (Math.floor(a) === a && Math.floor(b) === b) return (a * 3) + b;
+  if (px === ((a*ax) + (b*bx)) && py === ((a*ay) + (b*by)) && a >= 0 && b >= 0) return (a * 3) + b;
   return 0;
 }
 
