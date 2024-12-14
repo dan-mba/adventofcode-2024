@@ -63,8 +63,8 @@ function solveGame2(game:Game):number {
   ];
   const constants = [px, py];
   const answers = lusolve(coefficients, constants).flat();
-  const a = Math.floor(Number(answers[0]) * 100)/100;
-  const b = Math.floor(Number(answers[1]) * 100)/100;
+  const a = Math.round(Number(answers[0]));
+  const b = Math.round(Number(answers[1]));
 
   // console.log(a,b)
 
