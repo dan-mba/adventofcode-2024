@@ -1,8 +1,6 @@
-import { SQRT1_2 } from "mathjs";
 import { open } from "node:fs/promises";
 import { join } from "node:path";
 import { cwd } from "node:process";
-import type { isBreakOrContinueStatement } from "typescript";
 
 let fh;
 let registersObject = {
@@ -88,8 +86,40 @@ function runOp(opcode: number, operand:number):void {
   }
 }
 
+function checkA(aValue: number, currentOutput: string, program:number[]): boolean {
+  registersObject = structuredClone(initialRegisters);
+  registersObject.a = aValue;
+  instructionPointer = 0;
+  output = [];
+
+  while (program.length - instructionPointer >= 2) {
+    const opcode = program[instructionPointer] ?? 8;
+    const operand = program[instructionPointer + 1] ?? 8;
+    instructionPointer += 2;
+    runOp(opcode, operand)
+  }
+
+  const outputString = output?.join(",")
+  if (outputString == currentOutput) {
+    return true;
+  }
+  return false;
+}
+
+function nextBit(startA: number, bitsCount: number, program: number[]): number[] {
+  const bits = []
+  const currentString = program.slice(-1*(bitsCount+1)).join(",");
+  for (let a = 0; a < 8; a++) {
+    if (checkA(startA + a, currentString, program)) {
+      bits.push(a);
+    }
+  }
+
+  return bits;
+}
+
 try {
-  fh = await open(join(cwd(),"input/seventeen.txt"), "r");
+  fh = await open(join(cwd(),"input/seventeen.practice2.txt"), "r");
   const data = await fh.readFile({encoding: "utf-8"});
   const sections = data.split("\n\n");
 
@@ -105,41 +135,49 @@ try {
   console.log(output?.join(","));
 
   let aValue = 0;
-  let bits = [];
-  let bitNumber = 0
+  let allBits:number[][] = [];
+  let currentBits = [];
   const programString = program.join(",");
-  while (true){
-    const currentString = program.slice(-1*(bits.length+1)).join(",");
-    while (true) {
-      registersObject = structuredClone(initialRegisters);
-      registersObject.a = aValue;
-      instructionPointer = 0;
-      output = [];
-
-      while (program.length - instructionPointer >= 2) {
-        const opcode = program[instructionPointer] ?? 8;
-        const operand = program[instructionPointer + 1] ?? 8;
-        instructionPointer += 2;
-        runOp(opcode, operand)
-      }
-
-      const outputString = output?.join(",")
-      if (outputString == currentString) {
-        bits.push(aValue);
-        console.log(aValue.toString(8))
+  currentBits = nextBit(0, 0, program);
+  while (currentBits.length > 0) {
+    console.log(currentBits);
+    console.log(allBits);
+    const bitZero = currentBits[0] ?? 0;
+    if(program.length === allBits.length + 1) {
+      console.log("checking: ", aValue);
+      const solved = checkA(aValue+bitZero, programString, program)
+      if (solved) {
+        aValue += bitZero;
         break;
       }
+      currentBits.shift();
+      if(currentBits.length === 0  && allBits.length > 0) {
+        while (currentBits.length < 2) {
+          currentBits = allBits.pop() ?? [];
+          aValue = aValue >>> 3;
+        }
+        currentBits.shift();
+      }
+      continue;
+    }
+    const bits = nextBit((aValue+bitZero) << 3, allBits.length+1, program);
+    console.log("bits: ", bits, aValue, bitZero)
     
-      aValue += 1;
+    if (bits.length > 0) {
+      allBits.push(currentBits);
+      aValue = (aValue + bitZero) << 3;
+      currentBits = bits;
+      continue;
+    }
 
+    currentBits.shift();
+    if(currentBits.length === 0  && allBits.length > 0) {
+      while (currentBits.length < 2) {
+        currentBits = allBits.pop() ?? [];
+        aValue = aValue >>> 3;
+      }
+      currentBits.shift();
     }
-    if (currentString == programString) {
-      break;
-    }
-    bitNumber = aValue
-    aValue = bitNumber * 8;
-    console.log(aValue.toString(8))
-    console.log(currentString)
   }
 
   console.log(aValue);
