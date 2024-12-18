@@ -10,12 +10,12 @@ let registersObject = {
 };
 let initialRegisters = structuredClone(registersObject);
 
-let program = [];
+let program:number[] = [];
 let output:number[] = [];
 let instructionPointer = 0;
 
-function getProgram(sections: string[]): number[] {
-  if (sections.length < 2) return [];
+function getProgram(sections: string[]): void {
+  if (sections.length < 2) return;
 
   const registers = sections[0]?.split("\n");
   if (registers) {
@@ -36,8 +36,8 @@ function getProgram(sections: string[]): number[] {
     initialRegisters = structuredClone(registersObject)
   }
 
-  const program = sections[1]?.split(": ")[1];
-  return program?.split(",").map(x => Number(x)) ?? [];
+  const p = sections[1]?.split(": ")[1];
+  program = p?.split(",").map(x => Number(x)) ?? [];
 }
 
 function getCombo(operand:number):number {
@@ -66,7 +66,7 @@ function runOp(opcode: number, operand:number):void {
       registersObject.b = getCombo(operand) % 8;
       return;
     case 3:
-      if (registersObject.a ===0) return;
+      if (registersObject.a === 0) return;
       instructionPointer = operand;
       return;
     case 4:
@@ -86,7 +86,7 @@ function runOp(opcode: number, operand:number):void {
   }
 }
 
-function checkA(aValue: number, currentOutput: string, program:number[]): boolean {
+function checkA(aValue: number, currentOutput: string): boolean {
   registersObject = structuredClone(initialRegisters);
   registersObject.a = aValue;
   instructionPointer = 0;
@@ -100,19 +100,15 @@ function checkA(aValue: number, currentOutput: string, program:number[]): boolea
   }
 
   const outputString = output?.join(",")
-  if (outputString == currentOutput) {
-    return true;
-  }
-  return false;
+  return (outputString.localeCompare(currentOutput) === 0);
 }
 
-function nextBit(startA: string, program: number[]): number[] {
+function nextBit(startA: string): number[] {
   const bits = []
   const aVal = parseInt(startA, 8);
   const currentString = program.slice(-1*(startA.length)).join(",");
-  console.log(currentString);
   for (let a = 0; a < 8; a++) {
-    if (checkA(aVal + a, currentString, program)) {
+    if (checkA(aVal + a, currentString)) {
       bits.push(a);
     }
   }
@@ -125,7 +121,7 @@ try {
   const data = await fh.readFile({encoding: "utf-8"});
   const sections = data.split("\n\n");
 
-  program = getProgram(sections);
+  getProgram(sections);
 
   while (program.length - instructionPointer >= 2) {
     const opcode = program[instructionPointer] ?? 8;
@@ -140,14 +136,16 @@ try {
   let allBits:number[][] = [];
   let currentBits = [];
   const programString = program.join(",");
-  currentBits = nextBit("0", program);
+  currentBits = nextBit("0");
   while (currentBits.length > 0) {
+    console.log(currentBits)
+    console.log(aValue)
     const bitZero = currentBits[0] ?? 0;
     currentBits = currentBits.slice(1);
     if(program.length === aValue.length + 1) {
       const checkVal = parseInt(aValue + bitZero, 8);
       console.log("checking: ", checkVal);
-      const solved = checkA(checkVal, programString, program);
+      const solved = checkA(checkVal, programString);
       if (solved) {
         aValue = aValue + bitZero;
         break;
@@ -160,9 +158,7 @@ try {
       continue;
     }
 
-    const bits = nextBit(aValue+bitZero+"0", program);
-    console.log("bits: ", bits, aValue, bitZero)
-    
+    const bits = nextBit(aValue+bitZero+"0");
     if (bits.length > 0) {
       allBits.push(currentBits);
       aValue = aValue + bitZero;
@@ -174,9 +170,6 @@ try {
       currentBits = allBits.pop() ?? [];
       aValue = aValue.slice(0, -1);
     }
-
-    console.log(currentBits);
-    console.log(allBits);
   }
 
   console.log(parseInt(aValue, 8));
