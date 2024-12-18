@@ -106,11 +106,13 @@ function checkA(aValue: number, currentOutput: string, program:number[]): boolea
   return false;
 }
 
-function nextBit(startA: number, bitsCount: number, program: number[]): number[] {
+function nextBit(startA: string, program: number[]): number[] {
   const bits = []
-  const currentString = program.slice(-1*(bitsCount+1)).join(",");
+  const aVal = parseInt(startA, 8);
+  const currentString = program.slice(-1*(startA.length)).join(",");
+  console.log(currentString);
   for (let a = 0; a < 8; a++) {
-    if (checkA(startA + a, currentString, program)) {
+    if (checkA(aVal + a, currentString, program)) {
       bits.push(a);
     }
   }
@@ -119,7 +121,7 @@ function nextBit(startA: number, bitsCount: number, program: number[]): number[]
 }
 
 try {
-  fh = await open(join(cwd(),"input/seventeen.practice2.txt"), "r");
+  fh = await open(join(cwd(),"input/seventeen.txt"), "r");
   const data = await fh.readFile({encoding: "utf-8"});
   const sections = data.split("\n\n");
 
@@ -134,53 +136,52 @@ try {
 
   console.log(output?.join(","));
 
-  let aValue = 0;
+  let aValue = "";
   let allBits:number[][] = [];
   let currentBits = [];
   const programString = program.join(",");
-  currentBits = nextBit(0, 0, program);
+  currentBits = nextBit("0", program);
   while (currentBits.length > 0) {
-    console.log(currentBits);
-    console.log(allBits);
     const bitZero = currentBits[0] ?? 0;
-    if(program.length === allBits.length + 1) {
-      console.log("checking: ", aValue);
-      const solved = checkA(aValue+bitZero, programString, program)
+    currentBits = currentBits.slice(1);
+    if(program.length === aValue.length + 1) {
+      const checkVal = parseInt(aValue + bitZero, 8);
+      console.log("checking: ", checkVal);
+      const solved = checkA(checkVal, programString, program);
       if (solved) {
-        aValue += bitZero;
+        aValue = aValue + bitZero;
         break;
       }
-      currentBits.shift();
-      if(currentBits.length === 0  && allBits.length > 0) {
-        while (currentBits.length < 2) {
-          currentBits = allBits.pop() ?? [];
-          aValue = aValue >>> 3;
-        }
-        currentBits.shift();
+
+      while(currentBits.length === 0  && allBits.length > 0) {
+        currentBits = allBits.pop() ?? [];
+        aValue = aValue.slice(0, -1);
       }
       continue;
     }
-    const bits = nextBit((aValue+bitZero) << 3, allBits.length+1, program);
+
+    const bits = nextBit(aValue+bitZero+"0", program);
     console.log("bits: ", bits, aValue, bitZero)
     
     if (bits.length > 0) {
       allBits.push(currentBits);
-      aValue = (aValue + bitZero) << 3;
+      aValue = aValue + bitZero;
       currentBits = bits;
       continue;
     }
 
-    currentBits.shift();
-    if(currentBits.length === 0  && allBits.length > 0) {
-      while (currentBits.length < 2) {
-        currentBits = allBits.pop() ?? [];
-        aValue = aValue >>> 3;
-      }
-      currentBits.shift();
+    while(currentBits.length === 0  && allBits.length > 0) {
+      currentBits = allBits.pop() ?? [];
+      aValue = aValue.slice(0, -1);
     }
+
+    console.log(currentBits);
+    console.log(allBits);
   }
 
-  console.log(aValue);
+  console.log(parseInt(aValue, 8));
+} catch(e) {
+  console.log(e)
 } finally {
   await fh?.close()
 }
