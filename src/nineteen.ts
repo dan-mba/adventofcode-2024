@@ -2,35 +2,33 @@ import { open } from "node:fs/promises";
 import { join } from "node:path";
 import { cwd } from "node:process";
 
+interface CacheRecord {
+  [key: string] : number
+}
 let fh;
-let solved = false;
+let cache:CacheRecord = {}
 
-function tryTowels(towels:string[], combo:string): void {
-  if (solved) return
-
+function tryTowels(towels:string[], combo:string): number {
+  let count = 0;
+  if (cache[combo]) return cache[combo];
+  
   for (const t of towels) {
-    if (combo.includes(t)) {
-      const newCombo = combo.replace(t, "-");
-      const test = newCombo.replaceAll("-","");
-      if (test.length === 0) {
-        solved = true;
-        break;
+    if (combo.startsWith(t)) {
+      const newCombo = combo.slice(t.length)
+      if (newCombo.length === 0) {
+        count++;
+        continue;
       }
-      tryTowels(towels, newCombo);
+      count += tryTowels(towels, newCombo);
     }
   }
-}
 
-function checkCombo(towels:string[], combo:string): boolean {
-  solved = false;
-
-  tryTowels(towels, combo);
-
-  return solved
+  cache[combo] = count;
+  return count;
 }
 
 try {
-  fh = await open(join(cwd(),"input/nineteen.practice.txt"), "r");
+  fh = await open(join(cwd(),"input/nineteen.txt"), "r");
   const data = await fh.readFile({encoding: "utf-8"});
   const sections = data.split("\n\n");
   const towels = sections[0]?.split(", ") ?? [];
@@ -38,14 +36,18 @@ try {
   const combos = sections[1]?.split("\n").slice(0,-1) ?? [];
 
   let count = 0;
+  let comboCount = 0;
   for (const combo of combos) {
-    console.log(combo);
-    if (checkCombo(towels, combo)) {
+    const tryCount = tryTowels(towels, combo);
+    if (tryCount > 0) {
+      console.log(combo);
       count++;
+      comboCount += tryCount;
     }
   }
 
   console.log(count)
+  console.log(comboCount)
   
 } finally {
   await fh?.close()
