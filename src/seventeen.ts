@@ -60,7 +60,7 @@ function runOp(opcode: number, operand:number):void {
       registersObject.a = Math.floor(registersObject.a / d);
       return;
     case 1:
-      registersObject.b = registersObject.b ^ operand;
+      registersObject.b = Number(BigInt(registersObject.b) ^ BigInt(operand));
       return;
     case 2:
       registersObject.b = getCombo(operand) % 8;
@@ -70,7 +70,7 @@ function runOp(opcode: number, operand:number):void {
       instructionPointer = operand;
       return;
     case 4:
-      registersObject.b = registersObject.b ^ registersObject.c;
+      registersObject.b = Number(BigInt(registersObject.b) ^ BigInt(registersObject.c));
       return;
     case 5:
       output.push(getCombo(operand) % 8);
