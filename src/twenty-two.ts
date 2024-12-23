@@ -8,6 +8,8 @@ interface CacheRecord {
   [key: string] : number
 }
 const sequenceCache:CacheRecord = {};
+let max = 0;
+let maxSequence = "";
 
 function mix(secret:number, value:number):number {
   return Number(BigInt(secret) ^ BigInt(value));
@@ -29,6 +31,20 @@ function twoThousandSecret(secret:number): number {
     next = calculateNext(next);
   }
   return next;
+}
+
+function mergeCache(tempCache:CacheRecord): void {
+  for (const key in tempCache) {
+    if (sequenceCache[key]) {
+      sequenceCache[key] += (tempCache[key] ?? 0);
+    } else {
+      sequenceCache[key] = (tempCache[key] ?? 0);
+    }
+    if (sequenceCache[key] > max) {
+      maxSequence = key;
+      max = sequenceCache[key];
+    }
+  }
 }
 
 function twoThousandDigits(secret:number): number[] {
@@ -53,52 +69,39 @@ function findDiffs(digits: number[]):number[] {
 
 function findSequences(digits: number[]): void {
   const diffs = findDiffs(digits);
-
+  const tempCache:CacheRecord = {};
+ 
   for(let i = 4; i < digits.length; i++) {
-    if (digits[i] ?? 0 > 5) {
+    if ((digits[i] ?? 0) > 0) {
       const sequence = diffs.slice(i-4,i).join(",");
-      if (sequenceCache[sequence]) {
-        sequenceCache[sequence] += digits[i] ?? 0;
-      } else {
-        sequenceCache[sequence] = digits[i] ?? 0;
+      if (!tempCache[sequence]) {
+        tempCache[sequence] = (digits[i] ?? 0);
       }
     }
   }
+
+  mergeCache(tempCache);
 }
 
 try {
-  fh = await open(join(cwd(),"input/twenty-two.practice2.txt"), "r");
+  fh = await open(join(cwd(),"input/twenty-two.txt"), "r");
   const data = await fh.readFile({encoding: "utf-8"});
   const secrets = data.split("\n").slice(0,-1);
   const secretNums = secrets.map(x => Number(x));
 
-  // let sum = 0;
-  // for (const secret of secretNums) {
-  //   const next = twoThousandSecret(secret);
-  //   sum += next;
-  // }
-  // console.log("sum: ", sum);
+  let sum = 0;
+  for (const secret of secretNums) {
+    const next = twoThousandSecret(secret);
+    sum += next;
+  }
+  console.log("sum: ", sum);
 
 
   for (const secret of secretNums) {
     findSequences(twoThousandDigits(secret));
   }
 
-  const sequenceSet = Object.keys(sequenceCache);
-  let max = 0;
-  let maxSequence = "";
-  for (const key of sequenceSet) {
-    if((sequenceCache[key] ?? 0) > 20){
-      console.log(key, sequenceCache[key])
-    }
-    if ((sequenceCache[key] ?? 0) > max) {
-      maxSequence = key;
-      max = sequenceCache[key] ?? 0;
-    } 
-  }
   console.log(max, maxSequence);
-
-
 } finally {
   await fh?.close()
 }
