@@ -49,9 +49,19 @@ try {
   }
 
   const zDigits = Object.keys(wires).filter(w => w.startsWith("z")).sort().reverse();
-  const z = parseInt(zDigits.map(d => wires[d]?.toString()).join(""), 2);
+  const xDigits = Object.keys(wires).filter(w => w.startsWith("x")).sort().reverse();
+  const yDigits = Object.keys(wires).filter(w => w.startsWith("y")).sort().reverse();
+  const z = zDigits.map(d => wires[d]?.toString()).join("");
+  const x = xDigits.map(d => wires[d]?.toString()).join("");
+  const y = yDigits.map(d => wires[d]?.toString()).join("");
+  //const xAndY = (BigInt(`0b${x}`) & BigInt(`0b${y}`)).toString(2);
+  const xPlusY = (Number(`0b${x}`) + Number(`0b${y}`)).toString(2);
+  
 
-  console.log(z)
+  console.log(z, parseInt(z, 2));
+  console.log(xPlusY);
+  console.log(x);
+  console.log(y);
   
 } finally {
   await fh?.close()
