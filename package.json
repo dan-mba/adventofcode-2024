@@ -16,7 +16,8 @@
     "thirteen": "node dist/thirteen.js",
     "seventeen": "node dist/seventeen.js",
     "nineteen": "node dist/nineteen.js",
-    "twenty-two": "node dist/twenty-two.js"
+    "twenty-two": "node dist/twenty-two.js",
+    "twenty-four": "node dist/twenty-four.js"
   },
   "keywords": [],
   "author": "",
